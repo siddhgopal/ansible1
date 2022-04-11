@@ -1,0 +1,30 @@
+---
+-name: apache installation in ansible machine
+ host: all
+ remote_user:root
+ become: true 
+ task:
+      -name: apache installation 
+       yum:
+           name:http
+           state: latest
+      -name: make file in /var/www/html
+       copy:
+           content: "Hellow from ansible-node"
+           dest: /var/www/html/index.html
+      -name: enable and start the service name by httpd 
+       service:
+            name: httpd 
+            start: started
+            enabled: yes 
+      -name: check the website
+       uri:
+         url:http://13.233.255.35
+         body_formate: raw
+         return_content: yes
+         method: GET
+         register: result
+      -name: print result var
+       debug:
+           var: result.content
+     

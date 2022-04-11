@@ -1,0 +1,146 @@
+# use case of handler
+---
+- name: use case of handlers
+  hosts: all
+  tasks: 
+          - name: to istall a package
+            yum:
+                  - name: httpd
+                    state: latest
+          - name: to copy a file 
+            copy:
+                   src: /home/admin/ansible/gopal
+                   dest: /var/www/html
+          - name: to start the service
+            service:
+                     name: httpd
+                     state: restarted
+---
+# notify to handler
+
+---
+- name: use case of handlers
+  hosts: all
+  tasks: 
+          - name: to copy a file 
+            copy:
+                   src: /home/admin/ansible/gopal
+                   dest: /var/www/html
+            notify: 
+                    - naveen
+  handlers: 
+          - name: naveen
+            service:
+                     name: httpd
+                     state: restarted
+---
+# if any changes the file so service will be restart
+
+- name: use case of handlers
+  hosts: all
+  tasks: 
+          - name: to copy a file 
+            copy:
+                   src: /home/admin/ansible/gopal
+                   dest: /var/www/html
+            notify: 
+                    - naveen
+                    - krishna 
+  handlers: 
+          - name: naveen
+            service:
+                     name: httpd
+                     state: restarted                                      
+          - name: krishna
+            yum:
+                     name: nfs_utils
+                     state: letest
+----
+
+#ignore errors
+
+- name: use case of handlers
+  hosts: all
+  force_handlers: yes
+  tasks: 
+          - name: to istall a package
+            yum:
+                  - name: Apache
+                    state: latest
+            ignore_errors: yes
+            notify:
+                    - naveen
+          - name: useradd
+            user: 
+                    name: gopal
+                    uid: 2100
+            failed_when: ansible_distribution == "redhad"        
+  handlers:
+          - name: naveen
+            service:
+                     name: httpd
+                     state: restarted
+---
+
+#use case of block
+
+---
+- name: use case of block
+  hosts: all
+  tasks:
+         - name: to install a package
+           yum:
+                 name: httpd
+                 state: latest 
+           when: ansible_distribution == "redhad"
+         - name: to restart the service
+           service: 
+                   name: httpd 
+                   state: restarted
+         - name: useradd
+           user: 
+                 name: raj
+                 uid: 1200
+           when: ansible_distribution == "redhad"
+---
+
+ - name: use case of block
+   hosts: all
+   tasks:
+         - block:
+               - name: to install a package
+                 yum:
+                      name: httpd
+                      state: latest 
+                 when: ansible_distribution == "redhad"
+               - name: to restart the service
+                service: 
+                         name: httpd 
+                         state: restarted
+               - name: useradd
+                 user: 
+                      name: raj
+                      uid: 1200
+                 when: ansible_distribution == "redhad"               
+
+# rescue task
+- name: use case of block
+  hosts: all
+  tasks:
+         - block:
+               - name: to install a package
+                 yum:
+                      name: apache
+                      state: latest 
+              rescue:  
+                      - neme: httpd
+                        state: latest          
+                 when: ansible_distribution == "redhad"
+           always:
+               - name: to restart the service
+                 service: 
+                         name: httpd 
+                         state: restarted
+              
+                                
+

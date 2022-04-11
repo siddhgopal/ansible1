@@ -1,0 +1,249 @@
+# sequrity of playbook
+
+----
+- name: to restart the service
+  hosts: all
+  tasks: 
+         - name: to restart the service
+           service:    
+                    name:  httpd
+                    state: restarted 
+---
+#ansible-voult create test.yml
+#ansible-voult edit test.yml
+# 3 type of run command
+#ansible-playbook test.yml --ask-voult-pass
+#ansible-playbook test.yml --voult-id@prompt
+#ansible-playbook test.yml --voult-password-file=./password.txt
+#ansible-voult view test.yml --voult-password-file=./password.txt 
+#ansible-voult edit test.yml --voult-password-file=./password.txt 
+#ansible-voult encrypt test.yml
+#ansible-voult view test.yml
+#ansible-voult decrypt test.yml
+#ansible-voult rekey test.yml
+
+#vim naveen.sh
+#!/bin/bash
+read -p "enter package name which you want to install:" naveen
+read -p "enter servich name which you want to start :" krishna
+read -p "enter firewall service:" grras
+read -p "enter user which want to add :" jio
+echo "package:$naveen" >> /home/admin/ansible/navi.yml
+echo "service:$krishna" >> /home/admin/ansible/navi.yml
+echo "firewall_service:$grras" >> /home/admin/ansible/navi.yml
+echo "user_1:$jio" >> /home/admin/ansible/navi.yml
+ansible-playbook krishna.yml
+rm -rf /home/admin/ansible/navi.yml
+
+
+#gathering fects
+#fects
+#ansible-doc setup 
+#ansible -m setup naveen > fectfile
+# 1st use case 
+
+---
+- name: use of fects
+  hosts: all
+  tasks:
+         - name: to print the msg
+           debug: 
+                  msg: my machine arch is {{ansible_architecture}} and bios version {{ansible_bios_version}} boot image info is {{ansible_cmdline.BOOT_IMAGE}} weekday is {{ansible_date_time.weekday}} ip address is {{ansible_default_ipv4.address}} {{ansible_device.xvda.size}}
+
+---
+#2nd use case
+---
+- name: use of fects
+  hosts: all
+  gather_fects: yes/no
+  tasks:
+         - name: to print the msg
+           debug: 
+                  msg: my machine arch is {{ansible_architecture}} and bios version {{ansible_bios_version}} boot image info is {{ansible_cmdline.BOOT_IMAGE}} weekday is {{ansible_date_time.weekday}} ip address is {{ansible_default_ipv4.address}} {{ansible_device.xvda.size}}
+
+--- 
+#custam fect
+# use case of loop
+
+---
+- name: use case of loop
+  hosts: all
+  tasks: 
+         - name: to install multiple package install
+           yum:
+                name: httpd,autofs
+                          or
+                      - httpd
+                      - autofs
+                state: latest 
+         - name: to start multiple service
+           service: 
+                    name: 
+                          - httpd
+                          - autofs
+                    state: started
+                    enabled: yes
+---
+
+#loop use of multiple service
+
+---
+- name: use case of loop
+  hosts: all
+  tasks: 
+         - name: to install multiple package install
+           yum:
+                name: httpd,autofs
+                          or
+                      - httpd
+                      - autofs
+                state: latest 
+         - name: to start multiple service
+           service: 
+                    name: "{{item}}"
+                    state: started
+                    enabled: yes
+           loop: 
+                   - httpd
+                   - autofs
+         - name: to istall multiple package
+           yum:
+                  name: "{{ item }}"
+                  state: latest
+                  enabled: yes
+           loop:
+                  - httpd
+                  - autofs
+         - name: to install multiple package
+           yum: 
+                  name: "{{ item }}"
+                  state: latest
+           loop:
+                  - httpd
+                  - autofs
+
+#loop use as a veriable
+
+- name: use case of loop
+  hosts: all
+  vars: 
+         krishna: 
+                  - httpd
+                  - autofs
+  tasks: 
+         - name: to install multiple package install
+           yum:
+                name: httpd,autofs
+                          or
+                      - httpd
+                      - autofs
+                state: latest 
+         - name: to start multiple service
+           service: 
+                    name: "{{item}}"
+                    state: started
+                    enabled: yes
+           loop: "{{ krishan }}"
+                  
+# add multiple user with multiple value
+
+---
+- name: add multiple user with multiple value
+  hosts: all
+  tasks:
+          - name: to add multiple user
+            user:
+                  name: "{{ item.name }}"
+                  commemnt: "{{ item.comment }}"
+                  uid: "{{ item.uid }}"
+            loop:
+                  - name: gopal
+                    comment: test user
+                    uid: 2000
+                    shell: /bin/bash
+                  - name: rajesh
+                    comment: test user
+                    uid: 2100
+                    shell: /sbin/nologin    
+
+#ansible -m command -a "tail -1 /etc/passwd" all
+#latest formate replace loop with_items:
+
+- name: add multiple user with multiple value
+  hosts: all
+  tasks:
+          - name: to add multiple user
+            user:
+                  name: "{{ item.name }}"
+                  commemnt: "{{ item.comment }}"
+                  uid: "{{ item.uid }}"
+            with_items:
+                  - name: gopal
+                    comment: test user
+                    uid: 2000
+                    shell: /bin/bash
+                  - name: rajesh
+                    comment: test user
+                    uid: 2100
+                    shell: /sbin/nologin    
+
+
+#condition
+#and,or
+
+---
+- name : use case of when (condition)
+  hosts: all
+  tasks: 
+         - name: package install
+           yum:
+                 name: httpd
+                 state: latest
+          when: (ansible_architecture == "x86_64" or ansible_distribution == "centos") and (ansible_distribution_version == "8.4" and ansible_devices.xvda is defined)
+---
+#follow of condition and 
+- name : use case of when (condition)
+  hosts: all
+  tasks: 
+         - name: package install
+           yum:
+                 name: httpd
+                 state: latest
+          when: 
+                - ansible_architecture == "x86_64" or 
+                - ansible_distribution == "centos" 
+                - ansible_distribution_version == "8.4" 
+                - ansible_devices.xvda is defined
+---
+                    
+#loop with condition
+
+---
+-neme: use case of loop with condition
+ hosts: all
+ tasks:
+        - name: to install multiple package install
+          yum:
+                name: 
+                      - httpd
+                      - autofs
+                state: latest
+        - name: to start multiple service
+          service: 
+                name: "{{ item }}"
+                state: started
+                enabled: yes
+          loop: 
+                    - httpd
+                    - autofs
+          when:  ansible_device.xvda.size == "10.00 GB" or ansible_distribution == "redhad" 
+          
+
+
+
+
+
+
+
+
+
