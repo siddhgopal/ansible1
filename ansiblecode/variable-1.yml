@@ -1,0 +1,160 @@
+---
+- name: this is my frist play book
+  hosts: servera,serverb
+  task:
+         - name: add a user
+           user:
+                  name: krishnatest
+                  uid: 2000
+                 shell: /bin/bash
+                 comment: test user
+                 groups: wheel, root
+         - name: install a packge
+           yum: 
+                 name:  httpd
+                 state: latest
+
+#ansible-playbook --syntax-check frist.yml
+#ansible-playbook frist.yml -c
+ 
+- name: this is my frist play book
+  hosts: 
+         - servera
+         - serverb
+         - serverc
+  task:
+         - name: add a user
+           user:
+                  name: krishnatest
+                  uid: 2000
+                 shell: /bin/bash
+                 comment: test user
+                 groups: wheel, root
+         - name: install a packge
+           yum: 
+                 name:  httpd
+                 state: latest
+- name: this is my second playbook 
+  hosts: servera
+  tasks:
+        - name: restart a service
+          service: 
+                  name: autofs
+                  state: restarted
+
+#ansible-playbook --syntax-check second.yml
+ #ansible-playbook frist.yml 
+
+
+ 1.playscope
+
+- name: use of variable in play scop 
+  hosts: all
+  tasks:
+        - name: to install a package 
+          yum: 
+                name: httpd
+                state: latest
+        - name: to start the service 
+          service: 
+                  name: httpd 
+                  state: latest
+                  enabled: yes
+        - name: to entry in firewall
+          firewalld: 
+                     service: http
+                     permanent: yes
+                     state: enabled
+                     immediate: yes
+        - name: add a user
+          user: 
+                name: testuser
+                comment: test user
+                shell: /sbin/nologin
+
+variable define
+
+- name: use of variable in play scop 
+  hosts: all
+  vars: 
+        package: httpd
+        service: httpd
+        firewall_service: http
+        user_1: test
+  tasks:
+        - name: to install a package named {{package}} 
+          yum: 
+                name: {{package}}
+                state: latest
+        - name: to start the service {{service}}
+          service: 
+                  name: {{service}}
+                  state: latest
+                  enabled: yes
+        - name: to entry in firewall {{firewall_service}}
+          firewalld: 
+                     service: {{firewall_service}}
+                     permanent: yes
+                     state: enabled
+                     immediate: yes
+        - name: add a user named {{user_1}}
+          user: 
+                name: {{user_1}}
+                comment: test user
+                shell: /sbin/nologin
+
+#ansible-playbook --syntax-check second.yml
+#ansible-playbook frist.yml 
+# ansible -m yum -a "name=firewall state=latest " all
+#ansible -m command -a "rpm -qi httpd" all
+2 method -
+
+name: use of variable in play scop 
+  hosts: all
+  vars_files:   
+              - /home/admin/ansible/xyz.yml
+  tasks:
+        - name: to install a package named {{package}} 
+          yum: 
+                name: {{package}}
+                state: latest
+        - name: to start the service {{service}}
+          service: 
+                  name: {{service}}
+                  state: latest
+                  enabled: yes
+        - name: to entry in firewall {{firewall_service}}
+          firewalld: 
+                     service: {{firewall_service}}
+                     permanent: yes
+                     state: enabled
+                     immediate: yes
+        - name: add a user named {{user_1}}
+          user: 
+                name: {{user_1}}
+                comment: test user
+                shell: /sbin/nologin
+                     
+                                
+# host scop
+#inventory file me entry:
+#tow host ip1,ip2
+#package = autofs  service: autofs
+           firewall_service: nfs
+           user_1: jio
+
+# array
+
+naveen:
+        name: naveen
+        comment: jio
+        shell: /bin/bash
+krishna:
+        name: rahul
+        comment: krish
+        shell: /sbin/nologin 
+
+
+# sequrity of playbook                    
+
+

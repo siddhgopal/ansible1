@@ -1,0 +1,79 @@
+#use case of roles
+
+---
+- name: to install a package {{ web_package }}
+  yum: 
+         name: "{{ web_package}}"
+         state: latest
+- name: to start the service "{{ web_service}}"
+  service:
+          name: "{{ web_service}}"
+          state: started
+          enabled: yes
+- name: to install secure package  {{ firewall_package }}          
+  yum: 
+         name: "{{ firewall_package}}"
+         state: latest
+  service:
+          name: "{{ firewall_service}}"
+          state: latest       
+- name: add to port "{{ firewall_port}}"  
+  firewalld:                                  
+          port: "{{ firewall_port}}" 
+          permanent: yes
+          state: enable
+          immediate: yes
+- name: add to service "{{ firewall_service}}"  
+  firewalld:                                  
+          port: "{{ firewall_service}}" 
+          permanent: yes
+          state: enable
+          immediate: yes
+- name: add to service "{{ firewall_service}}"  
+  firewalld:                                  
+          port: "{{ firewall_service}}" 
+          permanent: yes
+          state: enable
+          immediate: yes
+- name: to website content   
+ template:              
+          src: krishna.j2
+          dest: /var/www/html/index.html
+  notify: 
+        - name: naveen 
+- name: to copy conf file   
+ template:        
+          src: rahul.j2
+          dest: /etc/http/conf.d/xyz.conf
+
+#ansible-galaxy install geerlingguy.java
+#Dashboard >> Manage Jenkins >> Manage  Plugin
+#Dashboard >> new Item >> give name and create
+
+# apache.yml
+---
+- hosts: webservers 
+  become: True
+  tasks:
+    - name: Install packages
+      apt:
+        name: "nginx"
+        state: "present"
+    - name: Start nginx server
+      service:
+        name: nginx
+        state: started
+        enabled: True
+    - name: Deploy static website
+      copy:
+        src: index.html # We have define a html page 
+        dest: /var/www/html/
+...
+# We will install nginx and run the service then we will replace our own html oage with default page.
+
+#dev.inv
+
+[webservers]
+172.31.26.23 ansible_user=ec2-user 
+
+# this is the inventory file for remote server where we want to install n

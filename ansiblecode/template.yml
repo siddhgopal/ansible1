@@ -1,0 +1,18 @@
+# use case of template
+ 
+---
+- name: use case of template
+  hosts: all
+  tasks:
+         - name: to create a file
+           lineinfile:
+                   path: /home/testnavi
+                   line: |
+                           my dist. is {{ansible_distribution}}
+                           version is {{ansible_distribution_version}}
+                   create: yes
+         - name: to copy a file
+           template:  
+                    src: /home/admin/ansible/testfile
+                    dest: /home/jio1
+---
